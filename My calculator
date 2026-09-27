@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easy CRUD App</title>
+  <!-- Tailwind CSS CDN for visual styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4 flex justify-center items-center">
+
+  <div class="w-full max-w-md bg-gray-800 rounded-xl p-6 shadow-xl border border-gray-700">
+    <h1 class="text-2xl font-bold text-center mb-6 text-indigo-400">Easy Task CRUD App</h1>
+    
+    <!-- Input Form (Create & Update) -->
+    <form id="crudForm" onsubmit="handleSubmit(event)" class="space-y-4 mb-6">
+      <input type="hidden" id="editIndex" value="-1">
+      
+      <div>
+        <label class="block text-sm mb-1 text-gray-300">টাইটেল:</label>
+        <input type="text" id="title" required placeholder="যেমন: মিটিং সম্পূর্ণ করা" 
+               class="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-indigo-500">
+      </div>
+      
+      <div>
+        <label class="block text-sm mb-1 text-gray-300">বিবরণ:</label>
+        <input type="text" id="description" required placeholder="যেমন: ক্লায়েন্টের সাথে প্রজেক্ট আলোচনা" 
+               class="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-indigo-500">
+      </div>
+      
+      <button type="submit" id="submitBtn" 
+              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded transition duration-200">
+        ডাটা যোগ করুন (Create)
+      </button>
+    </form>
+
+    <!-- Data List (Read, Edit, Delete) -->
+    <div>
+      <h2 class="text-lg font-semibold mb-3 border-b border-gray-700 pb-2 text-gray-300">সংরক্ষিত ডাটা তালিকা:</h2>
+      <ul id="itemList" class="space-y-3"></ul>
+    </div>
+  </div>
+
+  <script>
+    // LocalStorage থেকে আগের ডাটা রিড করা
+    let items = JSON.parse(localStorage.getItem('crud_data')) || [];
+
+    // ১. Read: ডাটা পেজে দেখানো
+    function renderItems() {
+      const itemList = document.getElementById('itemList');
+      itemList.innerHTML = '';
+
+      if (items.length === 0) {
+        itemList.innerHTML = '<li class="text-gray-500 text-center text-sm py-4">কোনো ডাটা নেই</li>';
+        return;
+      }
+
+      items.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'bg-gray-700 p-3 rounded-lg flex justify-between items-center border border-gray-600';
+        li.innerHTML = `
+          <div>
+            <h3 class="font-bold text-indigo-300">${item.title}</h3>
+            <p class="text-xs text-gray-300">${item.description}</p>
+          </div>
+          <div class="space-x-2">
+            <button onclick="editItem(${index})" class="bg-yellow-600 hover:bg-yellow-700 text-xs px-2 py-1 rounded text-white">Edit</button>
+            <button onclick="deleteItem(${index})" class="bg-red-600 hover:bg-red-700 text-xs px-2 py-1 rounded text-white">Delete</button>
+          </div>
+        `;
+        itemList.appendChild(li);
+      });
+    }
+
+    // ২. Create এবং Update হ্যান্ডেল করা
+    function handleSubmit(e) {
+      e.preventDefault();
+      const titleInput = document.getElementById('title');
+      const descInput = document.getElementById('description');
+      const editIndex = parseInt(document.getElementById('editIndex').value);
+
+      const newItem = {
+        title: titleInput.value.trim(),
+        description: descInput.value.trim()
+      };
+
+      if (editIndex === -1) {
+        // Create (নতুন ডাটা যুক্ত করা)
+        items.push(newItem);
+      } else {
+        // Update (আগের ডাটা আপডেট করা)
+        items[editIndex] = newItem;
+        document.getElementById('editIndex').value = "-1";
+        
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "ডাটা যোগ করুন (Create)";
+        btn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded transition duration-200";
+      }
+
+      saveAndRender();
+      titleInput.value = '';
+      descInput.value = '';
+    }
+
+    // ৩. Update (ডাটা এডিট ফর্মে আনা)
+    function editItem(index) {
+      document.getElementById('title').value = items[index].title;
+      document.getElementById('description').value = items[index].description;
+      document.getElementById('editIndex').value = index;
+      
+      const btn = document.getElementById('submitBtn');
+      btn.innerText = "ডাটা আপডেট করুন (Update)";
+      btn.className = "w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 rounded transition duration-200";
+    }
+
+    // ৪. Delete (ডাটা মুছে ফেলা)
+    function deleteItem(index) {
+      if (confirm('আপনি কি এই ডাটাটি মুছে ফেলতে চান?')) {
+        items.splice(index, 1);
+        saveAndRender();
+      }
+    }
+
+    // LocalStorage-এ সেভ করা
+    function saveAndRender() {
+      localStorage.setItem('crud_data', JSON.stringify(items));
+      renderItems();
+    }
+
+    // পেজ লোড হলে প্রথমবার রেন্ডার করা
+    renderItems();
+  </script>
+</body>
+</html>
+nano index.html
+python -m http.server 8080
+
+
+
+
